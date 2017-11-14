@@ -1,5 +1,11 @@
-[0m[[0m[31merror[0m] [0m[0m/home/aidan/scala/cellularAutomata/cellularAutomata.scala:30:7: class NodeManager needs to be abstract, since variable resident is not defined[0m
-[0m[[0m[31merror[0m] [0m[0m(Note that variables need to be initialized to be defined)[0m
-[0m[[0m[31merror[0m] [0m[0mclass NodeManager extends Actor {[0m
-[0m[[0m[31merror[0m] [0m[0m      ^[0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
+[0m[[0m[31merror[0m] [0m[0m/home/aidan/scala/cellularAutomata/cellularAutomata.scala:59:27: type mismatch;[0m
+[0m[[0m[31merror[0m] [0m[0m found   : akka.actor.ActorRef[0m
+[0m[[0m[31merror[0m] [0m[0m required: NodeManager[0m
+[0m[[0m[31merror[0m] [0m[0m            world(i)(j) = nodeManager[0m
+[0m[[0m[31merror[0m] [0m[0m                          ^[0m
+[0m[[0m[31merror[0m] [0m[0m/home/aidan/scala/cellularAutomata/cellularAutomata.scala:61:16: type mismatch;[0m
+[0m[[0m[31merror[0m] [0m[0m found   : Array[Array[NodeManager]][0m
+[0m[[0m[31merror[0m] [0m[0m required: Array[Array[akka.actor.ActorRef]][0m
+[0m[[0m[31merror[0m] [0m[0m        return world[0m
+[0m[[0m[31merror[0m] [0m[0m               ^[0m
+[0m[[0m[31merror[0m] [0m[0mtwo errors found[0m
