@@ -58,6 +58,9 @@ class NodeManager(xc: Int, yc: Int) extends Actor {
             if (r.nextFloat <= (attacker.fitness - resident.fitness)) {
                 resident = new Creature(attacker.maxLifespan, attacker.fitness, attacker.name, resident.x, resident.y)
             }
+        case "speciesOne" => 
+            val speciesOneInstance = new Creature(1000,0.8,"1",resident.x,resident.y)
+            resident = speciesOneInstance
         case _ => println("Unknown message received")
     }
 }
@@ -66,7 +69,12 @@ object cellularAutomata  {
     def main(args: Array[String]) {
         val worldMap = generateWorld()
         //runSimulation(world)
+        populateWorld(worldMap)
         updateWorldState(worldMap,10,20)
+    }
+
+    def populateWorld(worldMap: scala.collection.immutable.Map[String,ActorRef]) = {
+        worldMap("5_5") ! "speciesOne"
     }
 
     def runSimulation(worldMap: scala.collection.immutable.Map[String,ActorRef]) = {

@@ -1,4 +1,4 @@
-[0m[[0m[31merror[0m] [0m[0m/home/aidan/scala/cellularAutomata/cellularAutomata.scala:147:22: not found: value innerLength[0m
-[0m[[0m[31merror[0m] [0m[0m            if (j == innerLength - 1) {[0m
-[0m[[0m[31merror[0m] [0m[0m                     ^[0m
+[0m[[0m[31merror[0m] [0m[0m/home/aidan/scala/cellularAutomata/cellularAutomata.scala:72:23: not found: value world[0m
+[0m[[0m[31merror[0m] [0m[0m        populateWorld(world)[0m
+[0m[[0m[31merror[0m] [0m[0m                      ^[0m
 [0m[[0m[31merror[0m] [0m[0mone error found[0m
