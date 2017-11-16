@@ -1,4 +1,4 @@
-[0m[[0m[31merror[0m] [0m[0m/home/aidan/scala/cellularAutomata/cellularAutomata.scala:72:23: not found: value world[0m
-[0m[[0m[31merror[0m] [0m[0m        populateWorld(world)[0m
-[0m[[0m[31merror[0m] [0m[0m                      ^[0m
-[0m[[0m[31merror[0m] [0m[0mone error found[0m
+[0m[[0m[33mwarn[0m] [0m[0m/home/aidan/scala/cellularAutomata/cellularAutomata.scala:64:19: non-variable type argument akka.actor.ActorRef in type pattern scala.collection.mutable.ArrayBuffer[akka.actor.ActorRef] is unchecked since it is eliminated by erasure[0m
+[0m[[0m[33mwarn[0m] [0m[0m        case nbs: ArrayBuffer[ActorRef] => [0m
+[0m[[0m[33mwarn[0m] [0m[0m                  ^[0m
+[0m[[0m[33mwarn[0m] [0m[0mone warning found[0m
