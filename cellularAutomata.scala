@@ -63,6 +63,15 @@ class NodeManager(xc: Int, yc: Int) extends Actor {
             resident = speciesTwoInstance
         case nbs: ArrayBuffer[ActorRef] => 
             neighours = nbs
+        case stringArray: Array[String] =>
+            val life = stringArray(0).toInt
+            println("life = " + life)
+            val fit = stringArray(1).toDouble
+            println("fit = " + fit)
+            val nam = stringArray(2)
+            println("nam = " + nam)
+            val newCreature = new Creature(life,fit,nam,resident.x,resident.y)
+            resident = newCreature
         case _ => println("Unknown message received")
     }
 }
@@ -81,8 +90,10 @@ object cellularAutomata  {
     def populateWorld(worldMap: scala.collection.immutable.Map[String,ActorRef], rows: Int, cols: Int) = {
         val bottomCorner = "0_0"
         val topCorner = "" + (rows - 1) + "_" + (cols - 1)
-        worldMap(bottomCorner) ! "speciesOne"
-        worldMap(topCorner) ! "speciesTwo"
+        val creatureOne = Array("10000","0.8","1")
+        val creatureTwo = Array("5000","0.4","2")
+        worldMap(bottomCorner) ! creatureOne
+        worldMap(topCorner) ! creatureTwo
     }
 
     def runSimulation(worldMap: scala.collection.immutable.Map[String,ActorRef]) = {
@@ -104,9 +115,7 @@ object cellularAutomata  {
                     val y: Int = j + moves(l)
                     val neighourKey: String = "" + x + "_" + y
                     if (worldMap isDefinedAt neighourKey) {
-                        if ( x != i || y != j) {
-                            neighours += worldMap(neighourKey)
-                        }
+                        neighours += worldMap(neighourKey)
                     }
                 }
                 creature ! neighours
@@ -129,6 +138,7 @@ object cellularAutomata  {
                 printWorldMap(worldMap, rows, cols)
                 startTime = System.currentTimeMillis()
             }
+            Thread.sleep(10)
         }
     }
 
