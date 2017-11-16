@@ -8,6 +8,10 @@ import scala.language.postfixOps
 import scala.collection.mutable.Map
 import scala.collection.mutable.ArrayBuffer
 
+/**
+ * Represents a creature with a maximum lifespan, an acutal lifespan
+ * a fitness score, a name and x/y co-ordinates
+ */
 class Creature(maxLifespanc: Int = 0, fitnessc: Double = 0, namec: String = "-", xc: Int, yc: Int) {
     val x: Int = xc
     val y: Int = yc
@@ -25,23 +29,24 @@ class Creature(maxLifespanc: Int = 0, fitnessc: Double = 0, namec: String = "-",
         val maxLifespan = r.nextInt(upperLimit) + 1
         return maxLifespan
     }
-
-    override 
-    def toString(): String = {
-        "Creature: maxLifespan(" + maxLifespan + 
-        "); fitness(" + fitness + 
-        "); name(" + name + 
-        "); birthTime(" + birthTime + ")"
-    }
 }
 
+/**
+ * An actor which runs on its own thread and manages a given node.
+ * Instance variables are a resident Creature and other neighouring
+ * Creatures. Initial constructor creates a "null" resident creatures
+ * with 0 lifespan and fitness, represented by a "-"
+ */
 class NodeManager(xc: Int, yc: Int) extends Actor {
+    // *** STATEFUL VARIABLES ***
     var resident: Creature = new Creature(0,0,"-",xc,yc)
     var neighours: ArrayBuffer[ActorRef] = ArrayBuffer[ActorRef]()
 
     def receive = {
+        // Returns resident Creature name
         case "requestName" =>
             sender ! resident.name
+        // Checks if resident Creature lifetime finished and attempts to reproduce in neighbouring nodes if so
         case "checkStatus" =>
             val currentTime: Long = System.currentTimeMillis()
             if (resident.maxLifespan != 0 && currentTime > resident.deathTime) {
@@ -50,43 +55,56 @@ class NodeManager(xc: Int, yc: Int) extends Actor {
                 }
                 resident = new Creature(0,0,"-",xc,yc)
             } 
+        // Recieves an attack by a Creature
         case attacker: Creature => 
             val r = scala.util.Random
             if (r.nextFloat <= (attacker.fitness - resident.fitness)) {
                 resident = new Creature(attacker.maxLifespan, attacker.fitness, attacker.name, resident.x, resident.y)
             }
-        case "speciesOne" => 
-            val speciesOneInstance = new Creature(10000,0.8,"1",resident.x,resident.y)
-            resident = speciesOneInstance
-        case "speciesTwo" => 
-            val speciesTwoInstance = new Creature(5000,0.4,"2",resident.x,resident.y)
-            resident = speciesTwoInstance
+        // Allocates neighbours to variable
         case nbs: ArrayBuffer[ActorRef] => 
             neighours = nbs
+        // Allocates value to new resident Creature
         case stringArray: Array[String] =>
             val life = stringArray(0).toInt
-            println("life = " + life)
             val fit = stringArray(1).toDouble
-            println("fit = " + fit)
             val nam = stringArray(2)
-            println("nam = " + nam)
             val newCreature = new Creature(life,fit,nam,resident.x,resident.y)
             resident = newCreature
+        // Error message
         case _ => println("Unknown message received")
     }
 }
 
+/**
+ * Cellular automata simulation in an arbitrarily sized grid
+ */
 object cellularAutomata  {
     def main(args: Array[String]) {
-        val rows: Int = 15
-        val cols: Int = 30
+        var r: Int = 15
+        var c: Int = 30
+        // If args present allocates world dimensions to them
+        if (args.length == 2) {
+            r = args(0).toInt
+            c = args(1).toInt
+            if (r < 1) {
+                r = 1
+            }
+            if (c < 1) {
+                c = 1
+            }
+        }
+        val rows = r
+        val cols = c
         val worldMap = generateWorld(rows,cols)
-        //runSimulation(world)
         populateWorld(worldMap,rows,cols)
         allocateNeighbours(worldMap,rows,cols)
         updateWorldState(worldMap,rows,cols)
     }
 
+    /**
+     * Allocates initial population to worldMap
+     */
     def populateWorld(worldMap: scala.collection.immutable.Map[String,ActorRef], rows: Int, cols: Int) = {
         val bottomCorner = "0_0"
         val topCorner = "" + (rows - 1) + "_" + (cols - 1)
@@ -96,13 +114,9 @@ object cellularAutomata  {
         worldMap(topCorner) ! creatureTwo
     }
 
-    def runSimulation(worldMap: scala.collection.immutable.Map[String,ActorRef]) = {
-        while (true) {
-            Thread.sleep(2000)
-            //printWorld(world)
-        }
-    }
-
+    /**
+     * Allocates neighouring ActorRefs to each ActorRef in worldMap
+     */
     def allocateNeighbours(worldMap: scala.collection.immutable.Map[String,ActorRef], rows: Int, cols: Int) = {
         for ( i <- 0 until rows; j <- 0 until cols) {
             val creatureKey: String = "" + i + "_" + j
@@ -123,6 +137,10 @@ object cellularAutomata  {
         }
     }
 
+    /**
+     * Updates worldMap state by sending messages to all nodeManagers
+     * and periodically printing to console
+     */
     def updateWorldState(worldMap: scala.collection.immutable.Map[String,ActorRef], rows: Int, cols: Int) = {
         val printFrequency: Int = 500
         var startTime: Long = System.currentTimeMillis() - printFrequency
@@ -138,23 +156,15 @@ object cellularAutomata  {
                 printWorldMap(worldMap, rows, cols)
                 startTime = System.currentTimeMillis()
             }
+            // Update only every 10 milliseconds, to reduce system workload
             Thread.sleep(10)
         }
     }
 
-    def checkCreatureStatus(world: Array[Array[ActorRef]]) = {
-        while (true) {
-            val outerLength : Int = world.length
-            val innerLength : Int = world(0).length
-            for (i <- 0 until outerLength; j <- 0 until innerLength) {
-                val nodeManager = world(i)(j)
-                nodeManager ! "checkStatus"
-            }
-        }
-    }
-
+    /**
+     * Generates worldMap hashmap of nodeManagers
+     */
     def generateWorld(rows: Int, cols: Int) : scala.collection.immutable.Map[String,ActorRef] = {
-    //def generateWorld() : Array[Array[ActorRef]] = {
         val world = Array.ofDim[ActorRef](rows,cols)
         val system = ActorSystem("CellularAutomataSystem")
         var nodeManagerMap: Map[String,ActorRef] =  Map()
@@ -162,14 +172,14 @@ object cellularAutomata  {
             val key = "" + i + "_" + j
             val nodeManager = system.actorOf(Props(new NodeManager(i,j)), name = "nodeManager_" + i + "_" + j)
             nodeManagerMap += (key -> nodeManager)
-            //val nodeManager = system.actorOf(Props[NodeManager], name = "nodeManager_" + i + "_" + j)
-            //world(i)(j) = nodeManager
         }
         val immutableNodeManagerMap = nodeManagerMap.toMap
-        //return world
         return immutableNodeManagerMap
     }
 
+    /**
+     * Prints current worldMap state to console
+     */
     def printWorldMap(worldMap : scala.collection.immutable.Map[String,ActorRef], rows: Int, cols: Int) = {
         for (i <- 0 until rows; j <- 0 until cols) {
             implicit val timeout = Timeout(5 seconds)
@@ -184,22 +194,4 @@ object cellularAutomata  {
         }
         println()
     }
-
-    def printWorld(world : Array[Array[ActorRef]]) = {
-        val outerLength : Int = world.length
-        val innerLength : Int = world(0).length
-        for (i <- 0 until outerLength; j <- 0 until innerLength) {
-            implicit val timeout = Timeout(5 seconds)
-            val nodeManager = world(i)(j)
-            val future = nodeManager ? "requestName"
-            val name = Await.result(future, timeout.duration).asInstanceOf[String]
-            print(name + " ")
-            if (j == innerLength - 1) {
-                print("\n")
-            }
-        }
-        println()
-    }
 }
-
-
